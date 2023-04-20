@@ -1,0 +1,5 @@
+Camisa,3,751.50
+Zapatos,1,950
+Pantalón,3,1830.75
+Playera,3,300
+Corbata,2,2000
