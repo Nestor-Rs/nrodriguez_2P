@@ -1,54 +1,44 @@
 const fs = require('fs');
 
-function readFile(path) {
+function readFile(filePath) {
   return new Promise((resolve, reject) => {
-    fs.readFile(path, 'utf8', (err, data) => {
-      if (err) reject(err);
-      else resolve(data);
-    });
-  });
-}
-
-function findMostCommonWord(text) {
-  return new Promise((resolve, reject) => {
-    // Dividir el texto en palabras
-    const words = text.toLowerCase().split(/\W+/);
-
-    // Contar la frecuencia de cada palabra
-    const frequencyMap = {};
-    words.forEach((word) => {
-      if (frequencyMap[word]) {
-        frequencyMap[word]++;
+    fs.readFile(filePath, 'utf8', (err, data) => {
+      if (err) {
+        reject(err);
       } else {
-        frequencyMap[word] = 1;
+        resolve(data);
       }
     });
-
-    // Encontrar la palabra con la frecuencia más alta
-    let mostCommonWord = null;
-    let highestFrequency = 0;
-    Object.keys(frequencyMap).forEach((word) => {
-      if (frequencyMap[word] > highestFrequency) {
-        mostCommonWord = word;
-        highestFrequency = frequencyMap[word];
-      }
-    });
-
-    if (mostCommonWord) {
-      resolve(mostCommonWord);
-    } else {
-      reject(new Error('No se encontró la palabra más común.'));
-    }
   });
 }
 
-readFile('archivo.txt')
-  .then((text) => {
-    return findMostCommonWord(text);
-  })
-  .then((mostCommonWord) => {
-    console.log(`La palabra más común es "${mostCommonWord}".`);
-  })
-  .catch((err) => {
-    console.error(err);
-  });
+function findMostCommonWords(filePath) {
+  return readFile(filePath)
+    .then(text => {
+      const wordCount = text
+        .split(/\W+/) // dividir el texto en palabras
+        .reduce((count, word) => {
+          count[word] = (count[word] || 0) + 1; // contar la frecuencia de cada palabra
+          return count;
+        }, {});
+      
+      let mostCommonWords = [];
+      let maxCount = 0;
+      
+      Object.entries(wordCount).forEach(([word, count]) => {
+        if (count > maxCount) { // encontrar la palabra más común
+          mostCommonWords = [word];
+          maxCount = count;
+        } else if (count === maxCount) { // manejar palabras con igual frecuencia
+          mostCommonWords.push(word);
+        }
+      });
+      
+      return mostCommonWords;
+    });
+}
+
+// ejemplo de uso
+findMostCommonWords('archivo.txt')
+  .then(words => console.log(`Las palabras más comunes son: ${words.join(', ')}`))
+  .catch(err => console.error(err));
